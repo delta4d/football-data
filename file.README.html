@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.8.7.6
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  hasFrames = window.top.frames.main ? true : false;
+  relpath = '';
+  framesUrl = "frames.html#!file.README.html";
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="header">
+      <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+      Class List
+    </a>
+  
+    <a class="full_list_link" id="method_list_link"
+        href="method_list.html">
+      Method List
+    </a>
+  
+    <a class="full_list_link" id="file_list_link"
+        href="file_list.html">
+      File List
+    </a>
+  
+</div>
+      <div class="clear"></div>
+    </div>
+
+    <iframe id="search_frame"></iframe>
+
+    <div id="content"><div id='filecontents'><h1>FootballData</h1>
+
+<p>A ruby wrapper of <a href="http://api.football-data.org/index">football-data.org</a></p>
+
+<h2>Installation</h2>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_gem'>gem</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>football__data</span><span class='tstring_end'>&#39;</span></span>
+</code></pre>
+
+<p>And then execute:</p>
+
+<pre class="code ruby"><code class="ruby">$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre class="code ruby"><code class="ruby">$ gem install football__data
+</code></pre>
+
+<h2>Usage</h2>
+
+<h3>API Usage</h3>
+
+<p>First you need to configure the api</p>
+
+<pre class="code ruby"><code class="ruby"><span class='const'>FootballData</span><span class='period'>.</span><span class='id identifier rubyid_configure'>configure</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_config'>config</span><span class='op'>|</span>
+    <span class='comment'># get api key at &#39;http://api.football-data.org/register&#39;
+</span>    <span class='id identifier rubyid_config'>config</span><span class='period'>.</span><span class='id identifier rubyid_api_key'>api_key</span> <span class='op'>=</span> <span class='const'>YOUR_API_KEY</span>
+
+    <span class='comment'># default api version is &#39;alpha&#39; if not setted
+</span>    <span class='id identifier rubyid_config'>config</span><span class='period'>.</span><span class='id identifier rubyid_api_version'>api_version</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>alpha</span><span class='tstring_end'>&#39;</span></span>
+
+    <span class='comment'># the default control method is &#39;full&#39; if not setted
+</span>    <span class='comment'># see request section on &#39;http://api.football-data.org/documentation&#39;
+</span>    <span class='id identifier rubyid_config'>config</span><span class='period'>.</span><span class='id identifier rubyid_response_control'>response_control</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>minified</span><span class='tstring_end'>&#39;</span></span>
+<span class='kw'>end</span>
+</code></pre>
+
+<p>Use <code>FootballData.fetch(resource, subresource, params)</code> to fetch the data.
+It returns a json parsed object. Such as:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='comment'># GET &#39;http://api.football-data.org/v1/soccerseasons&#39;
+</span><span class='const'>FootballData</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='symbol'>:soccerseasons</span><span class='rparen'>)</span>
+
+<span class='comment'># GET &#39;http://api.football-data.org/v1/soccerseasons/398/leagueTable&#39;
+</span><span class='const'>FootballData</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='symbol'>:soccerseasons</span><span class='comma'>,</span> <span class='symbol'>:leagueTable</span><span class='comma'>,</span> <span class='label'>id:</span> <span class='int'>398</span><span class='rparen'>)</span>
+
+<span class='comment'># GET &#39;http://api.football-data.org/v1/soccerseasons/398/fixtures?matchday=8&#39;
+</span><span class='const'>FootballData</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='symbol'>:soccerseasons</span><span class='comma'>,</span> <span class='symbol'>:fixtures</span><span class='comma'>,</span> <span class='label'>id:</span> <span class='int'>398</span><span class='comma'>,</span> <span class='label'>matchday:</span> <span class='int'>8</span><span class='rparen'>)</span>
+
+<span class='id identifier rubyid_res'>res</span> <span class='op'>=</span> <span class='const'>FootballData</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='symbol'>:teams</span><span class='comma'>,</span> <span class='symbol'>:players</span><span class='comma'>,</span> <span class='label'>id:</span> <span class='int'>57</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_pp'>pp</span> <span class='id identifier rubyid_res'>res</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>players</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_find'>find</span><span class='lbrace'>{</span><span class='op'>|</span><span class='id identifier rubyid_player'>player</span><span class='op'>|</span> <span class='id identifier rubyid_player'>player</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>name</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span> <span class='op'>=~</span> <span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>Mesut</span><span class='regexp_end'>/i</span></span><span class='rbrace'>}</span>
+<span class='comment'># {&quot;id&quot;=&gt;1967,
+</span><span class='comment'># &quot;name&quot;=&gt;&quot;Mesut Özil&quot;,
+</span><span class='comment'># &quot;position&quot;=&gt;&quot;Attacking Midfield&quot;,
+</span><span class='comment'># &quot;jerseyNumber&quot;=&gt;11,
+</span><span class='comment'># &quot;dateOfBirth&quot;=&gt;&quot;1988-10-15&quot;,
+</span><span class='comment'># &quot;nationality&quot;=&gt;&quot;Germany&quot;,
+</span><span class='comment'># &quot;contractUntil&quot;=&gt;&quot;2018-06-30&quot;,
+</span><span class='comment'># &quot;marketValue&quot;=&gt;&quot;40,000,000 €&quot;}
+</span></code></pre>
+
+<p>See api structure on page '<a href="http://api.football-data.org/documentation">http://api.football-data.org/documentation</a>'</p>
+
+<h3>Executable Usage</h3>
+
+<p>TODO</p>
+
+<h2>Contributing</h2>
+
+<p>Feel free to file an issue of make a pr.</p>
+</div></div>
+
+    <div id="footer">
+  Generated on Mon Dec  7 01:31:45 2015 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.8.7.6 (ruby-2.2.3).
+</div>
+
+  </body>
+</html>
