@@ -13,7 +13,7 @@ CLI                 = $PROGRAM_NAME
 HOME                = ENV["HOME"]
 EDITOR              = ENV["EDITOR"] || "vim"
 CONFIG_FILE         = "#{HOME}/.config/football-data/config.yml"
-CONFIG_FILE_EXAMPLE = "./config.yml.example"
+CONFIG_FILE_EXAMPLE = "config/config.yml.example"
 
 
 # check config file

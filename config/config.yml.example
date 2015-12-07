@@ -1,0 +1,11 @@
+# football__data config file example, yaml format
+
+# api info
+api_key: YOUR_API_KEY                      # must
+api_version: alpha|v1                      # optional, default to alpha
+
+# favorite setting
+# run `football list league` to get league id
+# run `football list team --league=ID` to get team id in league ID
+fav_league_id: YOUR_FAVORITE_LEAGUE_ID     # favorite league id
+fav_team_id: YOUR_FAVORITE_TEAM_ID         # favorite team id
