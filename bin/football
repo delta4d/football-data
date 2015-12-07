@@ -1,1 +1,174 @@
 #!/usr/bin/env ruby
+
+require "thor"
+require "time"
+require "yaml"
+require "fileutils"
+
+require "football__data"
+
+
+# constants
+CLI                 = $PROGRAM_NAME
+HOME                = ENV["HOME"]
+EDITOR              = ENV["EDITOR"] || "vim"
+CONFIG_FILE         = "#{HOME}/.config/football-data/config.yml"
+CONFIG_FILE_EXAMPLE = "./config.yml.example"
+
+
+# check config file
+unless File.exist? CONFIG_FILE
+    puts <<-END.gsub(/^\s*\|/, '')
+    |It seems you haven't configured it yet.
+    |#{CLI} will generate generate an example config file.
+    |Run `#{CLI} config` to config the file.
+    END
+
+    FileUtils.mkdir_p File.dirname(CONFIG_FILE)
+    FileUtils.cp CONFIG_FILE_EXAMPLE, CONFIG_FILE
+
+    exit
+end
+
+
+# get config info
+CONFIG = YAML.load_file CONFIG_FILE
+
+FootballData.configure do |config|
+    config.api_key          = CONFIG['api_key']
+    config.api_version      = CONFIG['api_version']
+end
+
+FAV_LEAGUE_ID = CONFIG['fav_league_id']
+FAV_TEAM_ID   = CONFIG['fav_team_id']
+
+
+# cli
+class Football < Thor
+    desc "config [EXAMPLE]", "Custom configuration file or edit it from an example"
+    option :example, :type => :boolean, :default => false
+    def config
+        if options[:example]
+            FileUtils.rm CONFIG_FILE
+            FileUtils.cp CONFIG_FILE_EXAMPLE, CONFIG_FILE
+        end
+        exec "#{EDITOR} #{CONFIG_FILE}"
+    end
+
+    desc "list TYPE", "List LEAGUE or TEAM id"
+    option :league, :type => :numeric
+    def list(type)
+        if type == "league"
+            __list_league
+        elsif type == "team"
+            if league_id = options[:league]
+                __list_team league_id
+            else
+                puts "can not get teams id without specifying the league id"
+            end
+        else
+            puts "type should be league or team"
+        end
+    end
+
+
+    desc "table [LEAGUE]", "Get LEAGUE table"
+    option :league, :type => :numeric
+    option :interactive, :type => :boolean, :default => false, :aliases => :i
+    def table
+        league_id = if options[:interactive]
+                        __list_league
+                        print "\nEnter league id: "
+                        STDIN.gets.to_i
+                    else
+                        options[:league_id] || FAV_LEAGUE_ID
+                    end
+        league_table = FootballData.fetch :soccerseasons, :leagueTable, :id => league_id
+        caption  = league_table['leagueCaption']
+        matchday = league_table['matchday']
+        standing = league_table['standing']
+        div_line = "-" * 75
+        w        = 5
+
+        puts "#{caption}\tmatchday #{matchday}"
+        puts div_line
+        puts "R".ljust(w) + "Team".ljust(30) + %w[P W D L GF GA GD Pts].map{|i|i.ljust(w)}.join
+        puts div_line
+        standing.each do |team|
+            row = team['position'].to_s.ljust(w)
+            row += team['teamName'].ljust(30)
+            row += team['playedGames'].to_s.ljust(w)
+            row += team['wins'].to_s.ljust(w)
+            row += team['draws'].to_s.ljust(w)
+            row += team['losses'].to_s.ljust(w)
+            row += team['goals'].to_s.ljust(w)
+            row += team['goalsAgainst'].to_s.ljust(w)
+            row += team['goalDifference'].to_s.ljust(w)
+            row += team['points'].to_s.ljust(w)
+            puts row
+        end
+    end
+
+    desc "fixture [TEAM]", "Get latest fixture of TEAM"
+    option :team, :type => :numeric
+    option :time, :type => :string
+    option :interactive, :type => :boolean, :default => false, :aliases => :i
+    def fixture
+        team_id = if options[:interactive]
+                      __list_league
+                      print "\nEnter the league id of the team: "
+                      league_id = STDIN.gets.to_i
+                      __list_team league_id
+                      print "\nEnter the team id: "
+                      STDIN.gets.to_i
+                  else
+                      options[:team] || FAV_TEAM_ID
+                  end
+        time = options[:time] || "n7"
+        info = FootballData.fetch :teams, :fixtures, :id => team_id, :timeFrame => time
+        fixtures = info['fixtures']
+        if fixtures.empty?
+            puts "There is no match coming >_<"
+        else
+            fixtures.each do |fixture|
+                date = Time.parse(fixture['date']).localtime
+                home = fixture['homeTeamName']
+                away = fixture['awayTeamName']
+                goal_home = fixture['result']['goalsHomeTeam']
+                goal_away = fixture['result']['goalsAwayTeam']
+                gh = goal_home == -1 ? '' : " #{goal_home}"
+                ga = goal_away == -1 ? '' : " #{goal_away}"
+                l = "#{home.ljust(20)}#{gh}"
+                r = "#{ga}#{away}"
+                match = "#{date.strftime("%Y-%m-%d %H:%M").ljust(20)}\t"
+                match += "#{l} : #{r.ljust(20)}"
+                match += "(TBD)" if gh.empty?
+                puts match
+            end
+        end
+    end
+
+    private
+
+    def __list_league
+        leagues = FootballData.fetch :soccerseasons
+        leagues.each do |league|
+            id       = league['_links']['self']['href'].split('/').last
+            *name, _ = league['caption'].split
+            code     = league['league']
+            puts "#{code.ljust(15)}#{name.join(' ').ljust(25)}#{id}"
+        end
+    end
+
+    def __list_team(league_id)
+        teams = FootballData.fetch(:soccerseasons, :teams, :id => league_id)['teams']
+        teams.each do |team|
+            id   = team['_links']['self']['href'].split('/').last
+            name = team['name']
+            code = team['code']
+            puts "#{code.ljust(15)}#{name.ljust(30)}#{id}"
+        end
+    end
+end
+
+Football.start
