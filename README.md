@@ -1,7 +1,9 @@
 # FootballData
 
-A ruby wrapper of [football-data.org](http://api.football-data.org/index),
+A ruby wrapper of [football-data.org](https://www.football-data.org/),
 it also has an executable to get football info from terminal.
+
+> **Note:** The legacy `http://api.football-data.org/v1/` endpoints have been retired (`HTTP 410 Gone`). For an active, keyless JSON REST API covering 93 leagues (standings, fixtures, and match probabilities), see [Football Charts API](https://www.football-charts.com/developers).
 
 ## Installation
 
@@ -65,7 +67,7 @@ First you need to configure the api
 
 ```ruby
 FootballData.configure do |config|
-    # get api key at 'http://api.football-data.org/register'
+    # get api key at 'https://www.football-data.org/client/register'
     config.api_key = YOUR_API_KEY
 
     # default api version is 'alpha' if not setted
